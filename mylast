@@ -1,0 +1,176 @@
+#!/bin/bash
+#----------------------------------------------#
+#                 GLOBAL DATA                  #
+#----------------------------------------------#
+SYSLOG="/var/log"
+LOG1="$SYSLOG/auth.log"
+LOG2="$SYSLOG/auth.log.1"
+LOG3="$SYSLOG/auth.log.2.gz"
+LOG4="$SYSLOG/auth.log.3.gz"
+LOG5="$SYSLOG/auth.log.4.gz"
+#----------------------------------------------#
+#               HELPER FUNCTIONS               #
+#----------------------------------------------#
+get_len() {
+    i=0
+    for word in $1; do
+        i=$((i+1))
+    done 
+    echo $i
+}
+
+get_time() {
+    time=$(echo "$1" | cut -d " " -f 1)
+    time=$(echo "$time" | cut -d "T" -f 2)
+    time=$(echo "$time" | cut -d "." -f 1)
+
+    echo $time
+}
+
+get_date() {
+    time=$(echo "$1" | cut -d " " -f 1)
+    time=$(echo "$time" | cut -d "T" -f 1)
+
+    echo $time
+}
+#----------------------------------------------#
+#                   MAIN                       # 
+#----------------------------------------------#
+mylast() {
+    session=""
+    queue=""
+
+    while read -r line; do
+        if [ "$(echo $line | grep "systemd-logind")" ]; then  
+            # User sucessful login
+            if [ "$(echo $line | grep -i "new session")" ]; then  
+                
+                i=1
+                while [ $i -le $(get_len "$line") ]; do
+                    word=$(echo $line | cut -d " " -f $i)
+ 
+                    if [ "$word" = "user" ]; then
+                        user=$( echo $line | cut -d " " -f $((i+1)) )
+                        csession=$( echo $line | cut -d " " -f $((i-2)) ) # hardcoded structure
+                       
+                        if [ "$user" != "lightdm." ]; then # to remove dot end of sentence
+                            echo "added $user to the queue"
+                            queue="$queue $user--$csession--$(get_date "$line")--$(get_time "$line")"
+                            echo "$queue"
+                        fi
+                    fi
+
+                    i=$(($i+1)) 
+                done
+
+            fi
+            
+            # System power down
+            if [ "$(echo $line | grep -i "system is powering down")" ]; then
+                echo "sys power down"
+                echo "updating entire queue"
+                
+                for user in $queue; do
+                        session="$session $user--$(get_time "$line")" # TODO  
+                done
+                queue=""
+            fi
+            
+            # User session remove
+            if [ "$(echo $line | grep -i "removed session")" ]; then
+                queue_temp=""
+
+                removed=$(echo $line | cut -d " " -f $(get_len "$line"))
+                removed="${removed:0:2}"
+
+                echo "session removed $removed"
+                echo "updating queue"
+                
+                for user in $queue; do
+                    if [ "$removed" = "$(echo $user | cut -d "-" -f 2)" ]; then
+                        echo "found user: $user to remove..."
+                        session="$session $user--$(get_time "$line")" # TODO
+                    else 
+                        queue_temp="$queue_temp $user"
+                    fi      
+                done
+                queue=$queue_temp
+            fi
+        fi
+    done < $LOG1
+    
+    # Current sessions
+    for user in $queue; do
+            session="$session $user (ongoing)" 
+    done
+    queue=""
+
+    echo $session
+}
+
+mylastb() {
+    session=""
+
+    while read -r line; do
+        if [ "$(echo $line | grep -i "password check failed")" ]; then
+            date="${line:0:10}"
+            time="${line:11:5}"
+            
+            user=$(echo "$line" | cut -d "-" -f 3) # Hardcoded structure
+            user=$(echo "$user" | cut -d " " -f 2) # Hardcoded structure
+
+            session="$session $user--$date--$time"
+        fi
+    done < $LOG1
+
+    echo $session
+}
+
+n() {
+    
+}
+
+p() {
+    
+}
+
+s() {
+
+}
+
+t() {
+
+}
+#----------------------------------------------#
+#       FUNCTION CALLS and PARAMETERS          #
+#----------------------------------------------#
+if [ "$1" = "-l" ]; then
+    mylast
+    exit 1
+fi
+
+if [ "$1" = "-lb" ]; then
+    mylastb
+    exit 1
+fi
+
+if [ "$2" = "-n" ]; then
+    n
+    exit 1
+fi
+
+if [ "$2" = "-p" ]; then
+    p
+    exit 1
+fi
+
+if [ "$2" = "-s" ]; then
+    s
+    exit 1
+fi
+
+if [ "$2" = "-t" ]; then
+    t
+    exit 1
+fi
+
