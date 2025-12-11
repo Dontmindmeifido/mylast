@@ -24,7 +24,7 @@ get_time() {
     time=$(echo "$time" | cut -d "T" -f 2)
     time=$(echo "$time" | cut -d "." -f 1)
 
-    echo $time
+    echo "${time:0:5}"
 }
 
 get_date() {
@@ -33,11 +33,38 @@ get_date() {
 
     echo $time
 }
+
+get_duration() {
+    start=$1
+    end=$2
+
+    sm=$(echo "$start" | cut -d ":" -f 2)
+    sh=$(echo "$start" | cut -d ":" -f 1)
+
+    em=$(echo "$end" | cut -d ":" -f 2)
+    eh=$(echo "$end" | cut -d ":" -f 1)
+
+
+    h=$((10#$eh-10#$sh))
+    m=$((10#$em-10#$sm))
+
+    if [ $m -le -1 ]; then
+        h=$(($h-1))
+        m=$(($m+60))
+    fi
+
+    if [ $h -le -1 ]; then
+        h=$(($h+24))
+    fi
+
+    echo "$h:$m"
+}
 #----------------------------------------------#
 #                   MAIN                       # 
 #----------------------------------------------#
+session=""
+
 mylast() {
-    session=""
     queue=""
 
     while read -r line; do
@@ -51,12 +78,13 @@ mylast() {
  
                     if [ "$word" = "user" ]; then
                         user=$( echo $line | cut -d " " -f $((i+1)) )
-                        csession=$( echo $line | cut -d " " -f $((i-2)) ) # hardcoded structure
-                       
-                        if [ "$user" != "lightdm." ]; then # to remove dot end of sentence
+                        user=$(echo $user | cut -d "." -f 1)
+
+                        nsession=$( echo $line | cut -d " " -f $((i-2)) )
+
+                        if [ "$user" != "lightdm" ]; then
                             echo "added $user to the queue"
-                            queue="$queue $user--$csession--$(get_date "$line")--$(get_time "$line")"
-                            echo "$queue"
+                            queue="$queue $user--$nsession--$(get_date "$line")--$(get_time "$line")"
                         fi
                     fi
 
@@ -71,7 +99,9 @@ mylast() {
                 echo "updating entire queue"
                 
                 for user in $queue; do
-                        session="$session $user--$(get_time "$line")" # TODO  
+                        duration=$(get_duration "$(echo "$user" | awk -F "--" '{print $4}')" "$(get_time "$line")")
+
+                        session="$session \n $user-$(get_time "$line")--($duration)" # TODO  
                 done
                 queue=""
             fi
@@ -88,8 +118,10 @@ mylast() {
                 
                 for user in $queue; do
                     if [ "$removed" = "$(echo $user | cut -d "-" -f 2)" ]; then
-                        echo "found user: $user to remove..."
-                        session="$session $user--$(get_time "$line")" # TODO
+                        echo -e "found user: $user to remove..."
+                        duration=$(get_duration "$(echo "$user" | awk -F "--" '{print $4}')" "$(get_time "$line")")
+
+                        session="$session \n $user-$(get_time "$line")--($duration)"
                     else 
                         queue_temp="$queue_temp $user"
                     fi      
@@ -101,76 +133,138 @@ mylast() {
     
     # Current sessions
     for user in $queue; do
-            session="$session $user (ongoing)" 
+            session="$session \n $user--(ongoing)" 
     done
     queue=""
+    
 
-    echo $session
+    
+    echo -e "${session//"--"/"  "}"
 }
 
 mylastb() {
-    session=""
-
     while read -r line; do
         if [ "$(echo $line | grep -i "password check failed")" ]; then
             date="${line:0:10}"
             time="${line:11:5}"
             
-            user=$(echo "$line" | cut -d "-" -f 3) # Hardcoded structure
-            user=$(echo "$user" | cut -d " " -f 2) # Hardcoded structure
+            user=$(echo "$line" | cut -d "-" -f 3)
+            user=$(echo "$user" | cut -d " " -f 2)
 
-            session="$session $user--$date--$time"
+            session="$session \n $user--$date--$time"
         fi
     done < $LOG1
 
-    echo $session
+    echo -e "${session//"--"/"  "}"
 }
 
 n() {
-    
-}
+    session="${session//"\n"/"  "}"
 
-p() {
+    i=$(get_len "$session")
+
+    bottom=$(($i - $1 + 1))
     
-}
+    while [ $i -ge $bottom ]; do
+        log=$(echo $session | cut -d " " -f $i)
+        echo -e "${log//"--"/"  "}"
+        
+        i=$(($i-1))
+    done
+}   
 
 s() {
+    session="${session//"\n"/"  "}"
 
+    for line in $session; do
+        date=$(echo $line | awk -F "--" '{print $3}')
+        time=$(echo $line | awk -F "--" '{print $4}')
+        time=$(echo $time | awk -F "-" '{print $1}')
+        datetime="$date-$time"
+        datetime="${datetime//"-"/""}"
+        datetime="${datetime//":"/""}"
+
+        cutoff=$1
+        cutoff="${cutoff//"-"/""}"
+        
+        if [ $datetime -ge $cutoff ]; then
+            echo -e "${line//"--"/"  "}"
+        fi
+    done
 }
 
 t() {
+    session="${session//"\n"/"  "}"
 
+    for line in $session; do
+        date=$(echo $line | awk -F "--" '{print $3}')
+        time=$(echo $line | awk -F "--" '{print $4}')
+        time=$(echo $time | awk -F "-" '{print $1}')
+        datetime="$date-$time"
+        datetime="${datetime//"-"/""}"
+        datetime="${datetime//":"/""}"
+
+        cutoff=$1
+        cutoff="${cutoff//"-"/""}"
+        
+        if [ $datetime -le $cutoff ]; then
+            echo -e "${line//"--"/"  "}"
+        fi
+    done
+}
+
+p() {
+    session="${session//"\n"/"  "}"
+
+    for line in $session; do
+        date=$(echo $line | awk -F "--" '{print $3}')
+
+        time=$(echo $line | awk -F "--" '{print $4}')
+        time=$(echo $time | awk -F "-" '{print $1}')
+        datetime="$date-$time"
+        datetime="${datetime//"-"/""}"
+        datetime="${datetime//":"/""}"
+
+        present=$1
+        present="${present//"-"/""}"
+
+        endtime=$(echo $line | awk -F "--" '{print $4}')
+        endtime=$(echo $endtime | awk -F "-" '{print $2}')
+        enddatetime="$date-$endtime"
+        enddatetime="${enddatetime//"-"/""}"
+        enddatetime="${enddatetime//":"/""}"
+
+        if [ $datetime -le $present ]; then
+            if [ $enddatetime -ge $present ]; then
+                echo -e "${line//"--"/"  "}"
+            fi
+        fi
+    done
 }
 #----------------------------------------------#
 #       FUNCTION CALLS and PARAMETERS          #
 #----------------------------------------------#
 if [ "$1" = "-l" ]; then
     mylast
-    exit 1
 fi
 
 if [ "$1" = "-lb" ]; then
     mylastb
-    exit 1
 fi
 
 if [ "$2" = "-n" ]; then
-    n
-    exit 1
+    n "$3"
 fi
 
 if [ "$2" = "-p" ]; then
-    p
-    exit 1
+    p "$3"
 fi
 
 if [ "$2" = "-s" ]; then
-    s
-    exit 1
+    s "$3"
 fi
 
 if [ "$2" = "-t" ]; then
-    t
-    exit 1
+    t "$3"
 fi
 
