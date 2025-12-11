@@ -1,16 +1,14 @@
 #!/bin/bash
-#----------------------------------------------#
-#                 GLOBAL DATA                  #
-#----------------------------------------------#
 SYSLOG="/var/log"
 LOG1="$SYSLOG/auth.log"
 LOG2="$SYSLOG/auth.log.1"
 LOG3="$SYSLOG/auth.log.2.gz"
 LOG4="$SYSLOG/auth.log.3.gz"
 LOG5="$SYSLOG/auth.log.4.gz"
-#----------------------------------------------#
-#               HELPER FUNCTIONS               #
-#----------------------------------------------#
+session=""
+
+
+
 get_len() {
     i=0
     for word in $1; do
@@ -59,10 +57,8 @@ get_duration() {
 
     echo "$h:$m"
 }
-#----------------------------------------------#
-#                   MAIN                       # 
-#----------------------------------------------#
-session=""
+
+
 
 mylast() {
     queue=""
@@ -83,7 +79,7 @@ mylast() {
                         nsession=$( echo $line | cut -d " " -f $((i-2)) )
 
                         if [ "$user" != "lightdm" ]; then
-                            echo "added $user to the queue"
+                            #echo "added $user to the queue"
                             queue="$queue $user--$nsession--$(get_date "$line")--$(get_time "$line")"
                         fi
                     fi
@@ -95,8 +91,8 @@ mylast() {
             
             # System power down
             if [ "$(echo $line | grep -i "system is powering down")" ]; then
-                echo "sys power down"
-                echo "updating entire queue"
+                #echo "sys power down"
+                #echo "updating entire queue"
                 
                 for user in $queue; do
                         duration=$(get_duration "$(echo "$user" | awk -F "--" '{print $4}')" "$(get_time "$line")")
@@ -113,12 +109,12 @@ mylast() {
                 removed=$(echo $line | cut -d " " -f $(get_len "$line"))
                 removed="${removed:0:2}"
 
-                echo "session removed $removed"
-                echo "updating queue"
+                #echo "session removed $removed"
+                #echo "updating queue"
                 
                 for user in $queue; do
                     if [ "$removed" = "$(echo $user | cut -d "-" -f 2)" ]; then
-                        echo -e "found user: $user to remove..."
+                        #echo -e "found user: $user to remove..."
                         duration=$(get_duration "$(echo "$user" | awk -F "--" '{print $4}')" "$(get_time "$line")")
 
                         session="$session \n $user-$(get_time "$line")--($duration)"
@@ -136,10 +132,6 @@ mylast() {
             session="$session \n $user--(ongoing)" 
     done
     queue=""
-    
-
-    
-    echo -e "${session//"--"/"  "}"
 }
 
 mylastb() {
@@ -154,8 +146,6 @@ mylastb() {
             session="$session \n $user--$date--$time"
         fi
     done < $LOG1
-
-    echo -e "${session//"--"/"  "}"
 }
 
 n() {
@@ -241,9 +231,9 @@ p() {
         fi
     done
 }
-#----------------------------------------------#
-#       FUNCTION CALLS and PARAMETERS          #
-#----------------------------------------------#
+
+
+
 if [ "$1" = "-l" ]; then
     mylast
 fi
@@ -254,17 +244,24 @@ fi
 
 if [ "$2" = "-n" ]; then
     n "$3"
+    exit 1
 fi
 
 if [ "$2" = "-p" ]; then
     p "$3"
+    exit 1
 fi
 
 if [ "$2" = "-s" ]; then
     s "$3"
+    exit 1
 fi
 
 if [ "$2" = "-t" ]; then
     t "$3"
+    exit 1
 fi
+
+echo -e "${session//"--"/"  "}"
+exit 1
 
