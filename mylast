@@ -124,8 +124,32 @@ mylast() {
                 done
                 queue=$queue_temp
             fi
+
+            # Log out
+            if [ "$(echo $line | grep -i "logged out")" ]; then
+                queue_temp=""
+
+                removed=$(echo $line | cut -d " " -f 5)
+                removed="${removed:0:2}"
+
+                #echo "session logged out $removed at $(get_time "$line")"
+                #echo "updating queue"
+                
+                for user in $queue; do
+                    if [ "$removed" = "$(echo $user | cut -d "-" -f 3)" ]; then
+                        #echo -e "found user: $user to remove... "
+                        duration=$(get_duration "$(echo "$user" | awk -F "--" '{print $4}')" "$(get_time "$line")")
+
+                        session="$session \n $user-$(get_time "$line")--($duration)"
+                    else 
+                        queue_temp="$queue_temp $user"
+                    fi      
+                done
+                queue=$queue_temp
+            fi
+
         fi
-    done < $LOG1
+    done <<< "$1"
     
     # Current sessions
     for user in $queue; do
@@ -145,7 +169,7 @@ mylastb() {
 
             session="$session \n $user--$date--$time"
         fi
-    done < $LOG1
+    done <<< "$1"
 }
 
 n() {
@@ -235,11 +259,15 @@ p() {
 
 
 if [ "$1" = "-l" ]; then
-    mylast
+    file="$(less $LOG5) $(less $LOG4) $(less $LOG3) $(cat $LOG2 $LOG1)"
+
+    mylast "$file"
 fi
 
 if [ "$1" = "-lb" ]; then
-    mylastb
+    file="$(less $LOG5) $(less $LOG4) $(less $LOG3) $(cat $LOG2 $LOG1)"
+
+    mylastb "$file"
 fi
 
 if [ "$2" = "-n" ]; then
