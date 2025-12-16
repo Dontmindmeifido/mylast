@@ -60,8 +60,8 @@ Scriptul ia date din fișierele \texttt{auth.log.x} (inclusiv cele comprimate cu
 \section{Caracteristici Principale}
 \begin{itemize}
     \item \textbf{Procesare Jurnale:} Citește și concatenează \texttt{auth.log}, \texttt{auth.log.1}, etc.
-    \item \textbf{Reconstruirea Sesiunii:} Reconstruieste exact firul de autentificare, deconectare al userului si shutdown al sistemului.
-    \item \textbf{Reconstruirea Esecurilor de Logare:} Determina sesiunile in care au avut loc esecuri de autentificare.
+    \item \textbf{Reconstruirea Sesiunii:} Reconstruiește exact firul de autentificare, deconectare al userului și shutdown al sistemului.
+    \item \textbf{Reconstruirea Eșecurilor de Logare:} Determină sesiunile în care au avut loc eșecuri de autentificare.
     \item \textbf{Filtrare:} Permite filtrarea rezultatelor după constrângeri de timp specifice (De la, Până la, Prezent), dar la fel și după numărul de afișări.
 \end{itemize}
 
@@ -71,7 +71,7 @@ Scriptul ia date din fișierele \texttt{auth.log.x} (inclusiv cele comprimate cu
 Asigurați-vă că următoarele sunt instalate:
 \begin{itemize}
     \item \texttt{bash} (Mediul Shell)
-    \item \texttt{less} (Citirea fișierelor text și, in special, gzip)
+    \item \texttt{less} (Citirea fișierelor text și, în special, gzip)
     \item \texttt{awk}, \texttt{cut}, \texttt{grep} (Procesare text)
 \end{itemize}
 
@@ -101,7 +101,7 @@ Determină modul de analiză:
 \begin{tabular}{|l|l|}
 \hline
 \textbf{Flag} & \textbf{Descriere} \\ \hline
-\texttt{-l} & \textbf{Ultimile Logări:} Analizează sesiunile reușite. \\ \hline
+\texttt{-l} & \textbf{Ultimele Logări:} Analizează sesiunile reușite. \\ \hline
 \texttt{-lb} & \textbf{Logări Eșuate:} Analizează încercările eșuate. \\ \hline
 \end{tabular}
 \caption{Moduri Principale de Execuție}
@@ -120,40 +120,39 @@ Acești parametri sunt valabili doar pentru modul \texttt{-l} de rulare al scrip
 \texttt{-t} & Arată sesiunile \textbf{până la} data specificată. \\ \hline
 \texttt{-p} & Arată sesiunile \textbf{active} la timpul specificat. \\ \hline
 \end{tabular}
-\caption{Optiuni de Filtrare}
+\caption{Opțiuni de Filtrare}
 \end{table}
 
 \subsection{Parametri de Filtrare \texttt{[valoare\_filtrare]}}
-Reprezinta valoarea ce tine de filtrare. Fiecare flag de filtru are un format unic pentru propria valoare.
+Reprezintă valoarea ce ține de filtrare. Fiecare flag de filtru are un format unic pentru propria valoare.
 
 \begin{table}[h]
 \centering
 \begin{tabular}{|l|l|l|}
 \hline
 \textbf{Flag} & \textbf{Format} & \textbf{Descriere} \\ \hline
-\texttt{-n} & \textbf{INT} & Numar intreg \\ \hline
-\texttt{-s} & \textbf{YYYY-MM-DD-HH:mm} & Data si timp \\ \hline
-\texttt{-t} & \textbf{YYYY-MM-DD-HH:mm} & Data si timp \\ \hline
-\texttt{-p} & \textbf{YYYY-MM-DD-HH:mm} & Data si timp \\ \hline
+\texttt{-n} & \textbf{INT} & Număr întreg \\ \hline
+\texttt{-s} & \textbf{YYYY-MM-DD-HH:mm} & Data și timp \\ \hline
+\texttt{-t} & \textbf{YYYY-MM-DD-HH:mm} & Data și timp \\ \hline
+\texttt{-p} & \textbf{YYYY-MM-DD-HH:mm} & Data și timp \\ \hline
 \end{tabular}
-\caption{Format Acceptat Pentru Parametrii Filtrarii}
+\caption{Format Acceptat Pentru Parametrii Filtrării}
 \end{table}
 
-\subsection{Interfata Grafica}
+\subsection{Interfața Grafică}
 
 Deși \textbf{MyLast} este o aplicație bazată pe linia de comandă, interfața sa vizuală este definită de formatarea strictă a datelor returnate la \textit{Standard Output}. Interacțiunea grafică are loc exclusiv în cadrul terminalului.
 
-\subsubsection{Arhitectura Interfetei}
+\subsubsection{Arhitectura Interfeței}
 Scriptul utilizează un \textit{layout tabular bazat pe text} pentru a reprezenta datele. Structura vizuală este proiectată pentru lizibilitate maximă, asemenea comenzilor \texttt{last, lastb}.
 
-Fiecare linie afișată reprezintă o entitate distincta și este împărțită în coloane vizuale delimitate prin spațiere dinamică:
+Fiecare linie afișată reprezintă o entitate distinctă și este împărțită în coloane vizuale delimitate prin spațiere dinamică.
 
 \subsubsection{Diagrama de Afișare}
-Fluxul vizual al datelor urmează o structura tabelara, pentru fiecare obiect de date:
 
 \begin{verbatim}
 |--------------------------------------------------------------|
-|Utilizator|Sesiune|   Data   |Ore de Inceput si Sfarsit|Durată|
+|Utilizator|Sesiune|   Data   |Ore de Început și Sfârșit|Durată|
 |----------|-------|----------|-------------------------|------|
 | student1 |  c2   |2025-12-01|     12:30-14:49         |(2:19)|
 | student2 |  c3   |2025-12-01|     12:12-14:30         |(2:18)|
@@ -164,7 +163,7 @@ Fluxul vizual al datelor urmează o structura tabelara, pentru fiecare obiect de
 
 \subsection{Exemple}
 
-\subsubsection{Utilizare de Baza (Modul \texttt{-l,-lb})}
+\subsubsection{Utilizare de Bază (Modul \texttt{-l,-lb})}
 
 Afișarea tuturor sesiunilor reușite (-l)
 \begin{lstlisting}[language=bash]
@@ -198,12 +197,12 @@ Verificarea prezenței la un moment dat (-p)
 sudo ./mylast.sh -l -p 2023-12-25-14:30
 \end{lstlisting}
 
-\section{Arhitectura Functionalitatii}
+\section{Arhitectura Proiectului}
 
-\subsection{Arhitectura Functiilor de Baza}
+\subsection{Arhitectura Funcțiilor de Bază}
 
-\subsubsection{Argumentul Fundamental al Functiilor}
-Scriptul definește o variabilă \texttt{SYSLOG} (\texttt{/var/log}) ce stocheaza locatia system log-urile. In continuare, următoarele fișiere sunt concatenate într-un singur string, care este redirectat spre funcțiile de baza \texttt{mylast/mylastb}:
+\subsubsection{Argumentul Fundamental al Funcțiilor}
+Scriptul definește o variabilă \texttt{SYSLOG} (\texttt{/var/log}) ce stochează locația system log-urile. În continuare, următoarele fișiere sunt concatenate într-un singur string, care este redirectat spre funcțiile de bază \texttt{mylast/mylastb}:
 
 \begin{lstlisting}[language=bash]
 LOG1="$SYSLOG/auth.log"
@@ -223,29 +222,29 @@ Funcția \texttt{mylast} implementează o mașină de stări pentru a urmări se
     \item \textbf{Oprire Sistem:} Dacă este detectat ``system is powering down'', toate sesiunile active sunt închise.
 \end{enumerate}
 
-Aceasta masina de stari este construita pe baza a 2 variabile: \\ \\ \textbf{Queue} coada - salveaza utilizatorii autentificati dar care inca nu au fost deconectati \\ \textbf{Session} sesiunea - salveaza utilizatorii conectati si deconectati ulterior. \\ \\
-Scriptul parcurge system log-urile linie dupa linie. Daca observa un nou utilizator, atunci acesta este salvat in queue. Daca acest utilizator este deconectat, atunci acesta este scos din queue si este salvat in session.
+Această mașină de stări este construită pe baza a 2 variabile: \\ \\ \textbf{Queue} coada - salvează utilizatorii autentificați dar care încă nu au fost deconectați \\ \textbf{Session} sesiunea - salvează utilizatorii conectați și deconectați ulterior. \\ \\
+Scriptul parcurge system log-urile linie după linie. Dacă observă un nou utilizator, atunci acesta este salvat în queue. Dacă acest utilizator este deconectat, atunci acesta este scos din queue și este salvat în session.
 
 \subsubsection{\texttt{mylastb}}
-Funcția \texttt{mylastb} proceseaza sesiunile in care utilizatorul a gresit parola. Functionalitatea de baza este asigurata de \texttt{grep} dupa sirul de caractere: "password check failed".
+Funcția \texttt{mylastb} procesează sesiunile în care utilizatorul a greșit parola. Funcționalitatea de bază este asigurată de \texttt{grep} după șirul de caractere: "password check failed".
 
-\subsection{Arhitectura Functiilor de Filtrare}
+\subsection{Arhitectura Funcțiilor de Filtrare}
 
 \subsubsection{\texttt{-n, -s, -t, -p}}
-Folosind totalitatea sesiunilor deja procesate de functia \texttt{mylast}, verifica daca data si timpul corespund cerintelor filtrului \texttt{(s, t, p)}, inclusiv si numarul de sesiuni ce necesita afisate \texttt{(n)}.
+Folosind totalitatea sesiunilor deja procesate de funcția \texttt{mylast}, verifică dacă data și timpul corespund cerințelor filtrului \texttt{(s, t, p)}, inclusiv și numărul de sesiuni ce necesită afișate \texttt{(n)}.
 
-\subsection{Arhitectura Functiilor Ajutatoare}
+\subsection{Arhitectura Funcțiilor Ajutătoare}
 
 \subsubsection{\texttt{get\_len}}
-Determina numarul de linii intr-un string delimitat prin spatii. Foloseste la parcurgerea variabilelor \textbf{Queue} si \textbf{Session}.
+Determină numărul de linii într-un string delimitat prin spații. Folosește la parcurgerea variabilelor \textbf{Queue} și \textbf{Session}.
 
 \subsubsection{\texttt{get\_time}}
-Parseaza linia de system log si returneaza timpul in care s-a inregistrat linia respectiva de jurnal. Foloseste la obtinerea timpului de autentificare al utilizatorului.
+Parsează linia de system log și returnează timpul în care s-a înregistrat linia respectivă de jurnal. Folosește la obținerea timpului de autentificare al utilizatorului.
 
 \subsubsection{\texttt{get\_date}}
-Parseaza linia de system log si returneaza data la care s-a inregistrat linia respectiva de jurnal. Foloseste la obtinerea datii de autentificare a utlizatorului
+Parsează linia de system log și returnează data la care s-a înregistrat linia respectivă de jurnal. Folosește la obținerea datei de autentificare a utilizatorului
 
 \subsubsection{\texttt{get\_duration}}
-Calculează diferența dintre timpul de început ($T_s$) și timpul de sfârșit ($T_e$) al unei sesiuni. Foloseste la formatarea finala a datelor despre timp pentru o sesiune incheiata a unui utilizator.
+Calculează diferența dintre timpul de început ($T_s$) și timpul de sfârșit ($T_e$) al unei sesiuni. Folosește la formatarea finală a datelor despre timp pentru o sesiune încheiată a unui utilizator.
 
 \end{document}
