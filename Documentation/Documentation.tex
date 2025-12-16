@@ -89,7 +89,7 @@ Scriptul acceptă argumente în linia de comandă pentru a determina modul de op
 \subsection{Sintaxă}
 
 \begin{lstlisting}[language=bash]
-./mylast.sh <mod> [flag\_filtrare] [valoare\_filtrare]
+./mylast.sh <mod> [flag_filtrare] [valoare_filtrare]
 \end{lstlisting}
 
 
@@ -128,21 +128,82 @@ Reprezinta valoarea ce tine de filtrare. Fiecare flag de filtru are un format un
 
 \begin{table}[h]
 \centering
-\begin{tabular}{|l|l|}
+\begin{tabular}{|l|l|l|}
 \hline
-\textbf{Flag} & \textbf{Format} \\ \hline
-\texttt{-n} & \textbf{<INT>} Accepta un Integer. \\ \hline
-\texttt{-s} & \textbf{<YYYY-MM-DD-HH:mm>} Accepta format tipic date-time. \\ \hline
-\texttt{-t} & \textbf{<YYYY-MM-DD-HH:mm>} Accepta format tipic date-time. \\ \hline
-\texttt{-p} & \textbf{<YYYY-MM-DD-HH:mm>} Accepta formate tipic date-time. \\ \hline
+\textbf{Flag} & \textbf{Format} & \textbf{Descriere} \\ \hline
+\texttt{-n} & \textbf{INT} & Numar intreg \\ \hline
+\texttt{-s} & \textbf{YYYY-MM-DD-HH:mm} & Data si timp \\ \hline
+\texttt{-t} & \textbf{YYYY-MM-DD-HH:mm} & Data si timp \\ \hline
+\texttt{-p} & \textbf{YYYY-MM-DD-HH:mm} & Data si timp \\ \hline
 \end{tabular}
 \caption{Format Acceptat Pentru Parametrii Filtrarii}
 \end{table}
 
-\section{Arhitectura de Baza}
+\subsection{Interfata Grafica}
 
-\subsection{Argumentul Fundamental al Tuturor Functiilor}
-Scriptul definește o variabilă \texttt{SYSLOG} (\texttt{/var/log}) ce stocheaza locatia syslog-urilor. In continuare, următoarele fișiere sunt concatenate într-un singur string, care este redirectat spre funcțiile de baza \texttt{mylast/mylastb}:
+Deși \textbf{MyLast} este o aplicație bazată pe linia de comandă, interfața sa vizuală este definită de formatarea strictă a datelor returnate la \textit{Standard Output}. Interacțiunea grafică are loc exclusiv în cadrul terminalului.
+
+\subsubsection{Arhitectura Interfetei}
+Scriptul utilizează un \textit{layout tabular bazat pe text} pentru a reprezenta datele. Structura vizuală este proiectată pentru lizibilitate maximă, asemenea comenzilor \texttt{last, lastb}.
+
+Fiecare linie afișată reprezintă o entitate distincta și este împărțită în coloane vizuale delimitate prin spațiere dinamică:
+
+\subsubsection{Diagrama de Afișare}
+Fluxul vizual al datelor urmează o structura tabelara, pentru fiecare obiect de date:
+
+\begin{verbatim}
+|--------------------------------------------------------------|
+|Utilizator|Sesiune|   Data   |Ore de Inceput si Sfarsit|Durată|
+|----------|-------|----------|-------------------------|------|
+| student1 |  c2   |2025-12-01|     12:30-14:49         |(2:19)|
+| student2 |  c3   |2025-12-01|     12:12-14:30         |(2:18)|
+|--------------------------------------------------------------|
+\end{verbatim}
+
+
+
+\subsection{Exemple}
+
+\subsubsection{Utilizare de Baza (Modul \texttt{-l,-lb})}
+
+Afișarea tuturor sesiunilor reușite (-l)
+\begin{lstlisting}[language=bash]
+sudo ./mylast.sh -l
+\end{lstlisting}
+
+Afișarea încercărilor de autentificare eșuate (-lb)
+\begin{lstlisting}[language=bash]
+sudo ./mylast.sh -lb
+\end{lstlisting}
+
+\subsubsection{Utilizare cu Filtre (Modul \texttt{-l})}
+
+Limitarea numărului de intrări (-n)
+\begin{lstlisting}[language=bash]
+sudo ./mylast.sh -l -n 5
+\end{lstlisting}
+
+Filtrare după data de început (-s)
+\begin{lstlisting}[language=bash]
+sudo ./mylast.sh -l -s 2023-12-01-12:00
+\end{lstlisting}
+
+Filtrare după data de sfârșit (-t)
+\begin{lstlisting}[language=bash]
+sudo ./mylast.sh -l -t 2024-01-15-23:59
+\end{lstlisting}
+
+Verificarea prezenței la un moment dat (-p)
+\begin{lstlisting}[language=bash]
+sudo ./mylast.sh -l -p 2023-12-25-14:30
+\end{lstlisting}
+
+\section{Arhitectura Functionalitatii}
+
+\subsection{Arhitectura Functiilor de Baza}
+
+\subsubsection{Argumentul Fundamental al Functiilor}
+Scriptul definește o variabilă \texttt{SYSLOG} (\texttt{/var/log}) ce stocheaza locatia system log-urile. In continuare, următoarele fișiere sunt concatenate într-un singur string, care este redirectat spre funcțiile de baza \texttt{mylast/mylastb}:
 
 \begin{lstlisting}[language=bash]
 LOG1="$SYSLOG/auth.log"
@@ -152,7 +213,7 @@ LOG4="$SYSLOG/auth.log.3.gz"
 LOG5="$SYSLOG/auth.log.4.gz"
 \end{lstlisting}
 
-\subsection{\texttt{mylast}}
+\subsubsection{\texttt{mylast}}
 
 Funcția \texttt{mylast} implementează o mașină de stări pentru a urmări sesiunile utilizatorilor.
 
@@ -163,28 +224,28 @@ Funcția \texttt{mylast} implementează o mașină de stări pentru a urmări se
 \end{enumerate}
 
 Aceasta masina de stari este construita pe baza a 2 variabile: \\ \\ \textbf{Queue} coada - salveaza utilizatorii autentificati dar care inca nu au fost deconectati \\ \textbf{Session} sesiunea - salveaza utilizatorii conectati si deconectati ulterior. \\ \\
-Scriptul parcurge syslog-urile linie dupa linie. Daca observa un nou utilizator, atunci acesta este salvat in queue. Daca acest utilizator este deconectat, atunci acesta este scos din queue si este salvat in session.
+Scriptul parcurge system log-urile linie dupa linie. Daca observa un nou utilizator, atunci acesta este salvat in queue. Daca acest utilizator este deconectat, atunci acesta este scos din queue si este salvat in session.
 
-\subsection{\texttt{mylastb}}
-Funcția \texttt{mylastb} proceseaza sesiunile in care utilizatorul a gresit parola. Cauta trivial linia, folosind \texttt{grep}, dupa sirul de caractere: "password check failed".
+\subsubsection{\texttt{mylastb}}
+Funcția \texttt{mylastb} proceseaza sesiunile in care utilizatorul a gresit parola. Functionalitatea de baza este asigurata de \texttt{grep} dupa sirul de caractere: "password check failed".
 
-\section{Arhitectura Filtrelor}
+\subsection{Arhitectura Functiilor de Filtrare}
 
-\subsection{\texttt{-n, -s, -t, -p}}
-Aceste filtre au o structura triviala, folosind totalitatea sesiunilor deja procesate de functia \texttt{mylast}. Se impart sesiunile distincte folosind de delimitatorul spatiu \texttt{(" ")} si verifica daca data si timpul corespund cerintelor filtrului \texttt{(s, t, p)}, inclusiv si numarul de sesiuni ce necesita afisate \texttt{(n)}.
+\subsubsection{\texttt{-n, -s, -t, -p}}
+Folosind totalitatea sesiunilor deja procesate de functia \texttt{mylast}, verifica daca data si timpul corespund cerintelor filtrului \texttt{(s, t, p)}, inclusiv si numarul de sesiuni ce necesita afisate \texttt{(n)}.
 
-\section{Arhitectura Ajutatoare}
+\subsection{Arhitectura Functiilor Ajutatoare}
 
-\subsection{\texttt{get\_len}}
-Foloseste comanda built-in "for" pentru a determina numarul de linii intr-un string delimitat prin spatii. \\ Foloseste la parcurgerea variabilelor \textbf{Queue} si \textbf{Session}.
+\subsubsection{\texttt{get\_len}}
+Determina numarul de linii intr-un string delimitat prin spatii. Foloseste la parcurgerea variabilelor \textbf{Queue} si \textbf{Session}.
 
-\subsection{\texttt{get\_time}}
-Parseaza linia de syslog si returneaza timpul in care s-a inregistrat linia respectiva de jurnal. \\ Foloseste la obtinerea timpului de autentificare al utilizatorului.
+\subsubsection{\texttt{get\_time}}
+Parseaza linia de system log si returneaza timpul in care s-a inregistrat linia respectiva de jurnal. Foloseste la obtinerea timpului de autentificare al utilizatorului.
 
-\subsection{\texttt{get\_date}}
-Parseaza linia de syslog si returneaza data la care s-a inregistrat linia respectiva de jurnal. \\ Foloseste la obtinerea datii de autentificare a utlizatorului
+\subsubsection{\texttt{get\_date}}
+Parseaza linia de system log si returneaza data la care s-a inregistrat linia respectiva de jurnal. Foloseste la obtinerea datii de autentificare a utlizatorului
 
-\subsection{\texttt{get\_duration}}
-Calculează diferența dintre timpul de început ($T_s$) și timpul de sfârșit ($T_e$). \\ Foloseste la formatarea finala a datelor despre timp pentru o sesiune incheiata a unui utilizator
+\subsubsection{\texttt{get\_duration}}
+Calculează diferența dintre timpul de început ($T_s$) și timpul de sfârșit ($T_e$) al unei sesiuni. Foloseste la formatarea finala a datelor despre timp pentru o sesiune incheiata a unui utilizator.
 
 \end{document}
