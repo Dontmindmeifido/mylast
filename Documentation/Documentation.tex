@@ -132,9 +132,9 @@ Reprezintă valoarea ce ține de filtrare. Fiecare flag de filtru are un format 
 \hline
 \textbf{Flag} & \textbf{Format} & \textbf{Descriere} \\ \hline
 \texttt{-n} & \textbf{INT} & Număr întreg \\ \hline
-\texttt{-s} & \textbf{YYYY-MM-DD-HH:mm} & Data și timp \\ \hline
-\texttt{-t} & \textbf{YYYY-MM-DD-HH:mm} & Data și timp \\ \hline
-\texttt{-p} & \textbf{YYYY-MM-DD-HH:mm} & Data și timp \\ \hline
+\texttt{-s} & \textbf{YYYY-MM-DD-HH-mm} & Data și timp \\ \hline
+\texttt{-t} & \textbf{YYYY-MM-DD-HH-mm} & Data și timp \\ \hline
+\texttt{-p} & \textbf{YYYY-MM-DD-HH-mm} & Data și timp \\ \hline
 \end{tabular}
 \caption{Format Acceptat Pentru Parametrii Filtrării}
 \end{table}
@@ -184,17 +184,17 @@ sudo ./mylast.sh -l -n 5
 
 Filtrare după data de început (-s)
 \begin{lstlisting}[language=bash]
-sudo ./mylast.sh -l -s 2023-12-01-12:00
+sudo ./mylast.sh -l -s 2023-12-01-12-00
 \end{lstlisting}
 
 Filtrare după data de sfârșit (-t)
 \begin{lstlisting}[language=bash]
-sudo ./mylast.sh -l -t 2024-01-15-23:59
+sudo ./mylast.sh -l -t 2024-01-15-23-59
 \end{lstlisting}
 
 Verificarea prezenței la un moment dat (-p)
 \begin{lstlisting}[language=bash]
-sudo ./mylast.sh -l -p 2023-12-25-14:30
+sudo ./mylast.sh -l -p 2023-12-25-14-30
 \end{lstlisting}
 
 \section{Arhitectura Proiectului}
@@ -202,7 +202,7 @@ sudo ./mylast.sh -l -p 2023-12-25-14:30
 \subsection{Arhitectura Funcțiilor de Bază}
 
 \subsubsection{Argumentul Fundamental al Funcțiilor}
-Scriptul definește o variabilă \texttt{SYSLOG} (\texttt{/var/log}) ce stochează locația system log-urile. În continuare, următoarele fișiere sunt concatenate într-un singur string, care este redirectat spre funcțiile de bază \texttt{mylast/mylastb}:
+Scriptul definește o variabilă \texttt{SYSLOG} (\texttt{/var/log}) ce stochează locația system log-urilor. În continuare, următoarele fișiere sunt concatenate într-un singur string, care este redirectat spre funcțiile de bază \texttt{mylast/mylastb}:
 
 \begin{lstlisting}[language=bash]
 LOG1="$SYSLOG/auth.log"
