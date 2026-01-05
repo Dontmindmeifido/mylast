@@ -1,22 +1,21 @@
-# 🕵️ MyLast
+# MyLast
 
-## 🌟 Overview
+## Overview
 
 **MyLast** is a Bash script designed to analyze authentication logs within `/var/log/`. It reproduces the functionality of the standard Linux `last` and `lastb` commands by parsing `auth.log` files, including historical logs compressed with `gzip`.
 
 ---
 
-## ✨ Key Idea
+## Key Idea
 
 * **State machine:** Built the session recosntruction model on a **Finite State Machine** architecture.
 
 ---
 
-## 🔧 Features and Tools
+## Features and Tools
 
 * **Successful Logins (-l):** Analyzes the full lifecycle of successful user sessions.
 * **Failed Logins (-lb):** Isolates unauthorized access attempts.
-* **Temporal Filtering:**
 * **-s (Since):** View sessions starting after a specific date.
 * **-t (Until):** View sessions ending before a specific date.
 * **-p (Present):** Audit who was logged in at a specific timestamp.
@@ -26,7 +25,7 @@
 
 ---
 
-## 🚀 Installation
+## Installation
 
 ### Option 1: Quick Setup
 
@@ -48,7 +47,7 @@ sudo ./mylast.sh -l
 
 ---
 
-## 📂 State Machine Architecture
+## State Machine Architecture
 
 * **Queue:** Stores users currently logged in but not yet disconnected.
 * **Session:** Stores completed session objects once a "removed session" or "power down" event is detected.
@@ -60,7 +59,7 @@ sudo ./mylast.sh -l
 
 ---
 
-## 📊 Usage Examples
+## Usage Examples
 
 ### Standard Audit
 
@@ -86,7 +85,7 @@ sudo ./mylast.sh -l -p 2025-12-25-14-30
 
 ---
 
-## 🔄 Dependencies
+## Dependencies
 
 * `bash`
 * `less`
@@ -94,11 +93,11 @@ sudo ./mylast.sh -l -p 2025-12-25-14-30
 
 ---
 
-## 📜 License
+## License
 
 This project is licensed under ME.
 
-## 👏 Credits
+## Credits
 
 * **Developer:** Ruslan Gaitur
 * **Academic Context:** Developed as part of the First Semester curriculum at the **University of Bucharest**.
